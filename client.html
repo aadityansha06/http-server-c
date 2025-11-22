@@ -7,9 +7,18 @@
     <title>Client Page</title>
 </head>
 <body>
-    <h1>Welcome to the Client Page</h1>
-    <p>This is a simple client HTML page.</p>
-   click <a href="http://localhost:8080/hello">here</a> to go to welcome page.
+  <h1>Welcome to the Client Login  Page</h1>
+      <!-- <p>This is a simple client HTML page.</p>
+   click <a href="http://localhost:8080/hello">here</a> to go to welcome page. -->
+ 
+
+ <form action="http://localhost:8080" method="post">
+
+    <input type="text" name="username" placeholder="Enter Username" required><br>
+    <input type="password" name="password" placeholder="Enter Password" required>
+    <button type="submit">Submit</button>
+
+ </form>
 
 </body>
 </html>
