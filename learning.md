@@ -64,3 +64,44 @@ int opt = 1;
 setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
 bind(sockfd, ...);
+
+
+
+IGINT  = Signal Interrupt (Ctrl+C)
+SIGTERM = Signal Terminate (kill command)
+```
+
+When you kill a process, the OS sends these signals. By default, your program exits **immediately** without cleanup.
+
+#include <unistd.h>
+#include <signal.h>
+
+### 2. **Why Ports Stay "In Use"**
+```
+Normal flow:
+Server running → bind() locks port 7070 → You press Ctrl+C → 
+Program exits IMMEDIATELY → close(sockfd) never called → 
+Port 7070 still locked by OS → "Address already in use" error
+3. Signal Handlers - Catching the Kill Signal
+Think of it like this:
+c// Without handler:
+Ctrl+C pressed → Program dies instantly → No cleanup
+
+// With handler:
+Ctrl+C pressed → Your function runs first → close(sockfd) → Then exit
+4. What You Need to Add:
+Step 1: Make socket global
+cint sockfd;  // Move outside main() so signal handler can access it
+Step 2: Create cleanup function
+cvoid cleanup_handler(int sig) {
+    printf("\nShutting down...\n");
+    close(sockfd);  // This releases the port!
+    exit(0);
+}
+
+
+
+Step 3: Register handlers at start of main()
+csignal(SIGINT, cleanup_handler);   // Catches Ctrl+C
+signal(SIGTERM, cleanup_handler);  // Catches kill command
+

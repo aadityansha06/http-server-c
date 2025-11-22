@@ -4,16 +4,31 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>   // for close()
+#include <signal.h>
 
- int main(int argc, char *argv[])
+int sockfd; 
+
+void cleanup_handler(int sig) {
+    printf("\nShutting down...\n");
+    close(sockfd);  // This releases the port!
+    exit(0);
+}
+
+int main(int argc, char *argv[])
 {
-   
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   signal(SIGINT,cleanup_handler); // cathes ctrl+c for terminating and do cleanup before it 
+  signal(SIGTERM,cleanup_handler);// Catches kill command
+  signal(SIGTSTP, cleanup_handler); // cathes ctrl+z do cleanup
+   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
     perror("Socket creation failed");
     return -1;
   }
   printf("Socket created successfully with file descriptor: %d\n", sockfd);
+
+
+
+
 
 int opt = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
@@ -30,6 +45,7 @@ int opt = 1;
 
   if(bind(sockfd,(struct sockaddr*)&servaddr, sizeof(servaddr))<0){
     perror("Bind failed");
+    close(sockfd);         
     return -1;  
   }
   printf("Bind successful\n");
